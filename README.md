@@ -1,5 +1,5 @@
 # pathlib
 
-Rust implementation of the classic ptyhon object oriented filesystem library.
+![example workflow](https://github.com/alexandreLamarre/pathlib/actions/workflows/unittest.yml/badge.svg)
 
-Mirror the implementation of
+Rust implementation of the classic ptyhon object oriented filesystem library.
