@@ -1,6 +1,6 @@
 on: [push, pull_request]
 
-name: CI - unittest
+name: CI
 
 jobs:
   build_and_test:
