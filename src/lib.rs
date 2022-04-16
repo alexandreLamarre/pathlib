@@ -24,6 +24,28 @@ pub trait PurePath {
     fn to_str(&self) -> &str;
 }
 
+/// High-Level Object oriented wrapper for handling filesystem paths
+pub trait Path {
+    fn new(path: &str) -> Self;
+    fn to_str(&self) -> &str;
+}
+
+/// Pure path implementation for non-windows systems.
+///
+/// On a POSIX system, instantiating a PurePath should return this object
+/// However, you can also instantiate it directly on any system
+pub struct PurePosixPath {
+    path: String,
+}
+
+/// Pure path implementation for windows systems.
+///
+/// On a Windows system, instantiating a PurePath should return this object
+/// However, you can also instantiate it directly on any system
+pub struct PureWindowsPath {
+    path: String,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
