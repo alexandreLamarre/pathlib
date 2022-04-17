@@ -19,25 +19,51 @@ fn _is_wildcard_pattern(pattern: &str) -> bool {
     pattern.contains('*') || pattern.contains('?') || pattern.contains('[')
 }
 
+/// Path implementation enum for the `Path` type.
+///
+/// Used to wrap the system specific implementation of the user exposed `Path` struct.
+enum PathImplementation {
+    Windows(PureWindowsPath),
+    Posix(PurePosixPath),
+    Pure(MockPath),
+}
+
 /// Pure path for handling IO operations in
 /// an object oriented way.
 pub trait PurePath {
     fn new(path: &str) -> Self;
     fn to_str(&self) -> &str;
-}
-
-/// High-Level Object oriented wrapper for handling filesystem paths
-pub trait Path {
-    fn new(path: &str) -> Self;
-    fn to_str(&self) -> &str;
+    fn is_dir(&self) -> bool;
+    fn is_file(&self) -> bool;
+    fn is_symlink(&self) -> bool;
+    fn is_executable(&self) -> bool;
+    fn is_readable(&self) -> bool;
+    fn is_writable(&self) -> bool;
+    fn bytes(&self) -> Vec<u8>;
+    // fn glob(&self, pattern: &str) -> std::slice::Iter<'_, Self>
+    // where
+    //     Self: std::marker::Sized;
+    // fn iterdir(&self) -> std::slice::Iter<'_, Self>
+    // where
+    //     Self: std::marker::Sized;
 }
 
 /// Mock filesystem path for testing Path trait
 struct MockPath {
     path: String,
+    // parts: Vec<String>,
+    // drive: String,
+    // root: String,
+    // anchor: String,
+    // parents: Vec<String>,
+    // parent: String,
+    // name: String,
+    // suffix: String,
+    // suffixes: Vec<String>,
+    // stem: String,
 }
 
-impl Path for MockPath {
+impl PurePath for MockPath {
     fn new(path: &str) -> Self {
         MockPath {
             path: path.to_string(),
@@ -47,6 +73,41 @@ impl Path for MockPath {
     fn to_str(&self) -> &str {
         self.path.as_str()
     }
+
+    fn is_dir(&self) -> bool {
+        true
+    }
+    fn is_file(&self) -> bool {
+        true
+    }
+    fn is_symlink(&self) -> bool {
+        true
+    }
+    fn is_executable(&self) -> bool {
+        true
+    }
+    fn is_readable(&self) -> bool {
+        true
+    }
+    fn is_writable(&self) -> bool {
+        true
+    }
+    fn bytes(&self) -> Vec<u8> {
+        self.path.as_bytes().to_vec()
+    }
+
+    // fn glob(&self, pattern: &str) -> std::slice::Iter<'_, Self>
+    // where
+    //     Self: std::marker::Sized,
+    // {
+    //     self.path.into_iter()
+    // }
+    // fn iterdir(&self) -> std::slice::Iter<'_, Self>
+    // where
+    //     Self: std::marker::Sized,
+    // {
+    //     self.path.split('/').map(|s| MockPath { path: s.to_string() }).collect::<Vec<_>>().into_iter()
+    // }
 }
 
 impl ToString for MockPath {
@@ -55,15 +116,31 @@ impl ToString for MockPath {
     }
 }
 
-/// Implement '/' operator for Path abstractions
-/// FIXME: this should avoid using Box to wrap the arguments because it
-/// produces a more verbose user API
-impl ops::Div<Box<dyn ToString>> for MockPath {
+/// Implement '/' operator for Path abstractions between paths
+impl ops::Div<MockPath> for MockPath {
     type Output = MockPath;
-    fn div(self, rhs: Box<dyn ToString>) -> MockPath {
+    fn div(self, rhs: MockPath) -> MockPath {
         MockPath {
-            path: format!("{}/{}", self.path, rhs.to_string()),
+            path: format!("{}/{}", self.path, rhs.path),
         }
+    }
+}
+
+/// Implement '/' for path abstractions between paths and string slices
+impl ops::Div<&str> for MockPath {
+    type Output = MockPath;
+    fn div(self, rhs: &str) -> MockPath {
+        MockPath {
+            path: format!("{}/{}", self.path, rhs),
+        }
+    }
+}
+
+/// Implement '/' for path abstractions between paths and strings
+impl ops::Div<String> for MockPath {
+    type Output = String;
+    fn div(self, rhs: String) -> String {
+        format!("{}/{}", self.path, rhs)
     }
 }
 
@@ -81,6 +158,11 @@ pub struct PurePosixPath {
 /// However, you can also instantiate it directly on any system
 pub struct PureWindowsPath {
     path: String,
+}
+
+/// Object oriented filesystems for Rust.
+pub struct Path {
+    path: PathImplementation,
 }
 
 #[cfg(test)]
@@ -130,11 +212,11 @@ mod tests {
     #[test]
     fn mock_path_concat() {
         let path = MockPath::new("dirname/subdir");
-        let concat = path / Box::new(MockPath::new("filename.extension"));
+        let concat = path / MockPath::new("filename.extension");
         assert_eq!(concat.to_str(), "dirname/subdir/filename.extension");
 
         let path2 = MockPath::new("dirname/subdir");
-        let concat2 = path2 / Box::new("filename.extension");
+        let concat2 = path2 / "filename.extension";
         assert_eq!(concat2.to_str(), "dirname/subdir/filename.extension");
     }
 }
