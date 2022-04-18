@@ -2,6 +2,7 @@
 
 [![Actions Status](https://github.com/alexandreLamarre/pathlib/workflows/CI/badge.svg)](https://github.com/alexandreLamarre/pathlib/actions)
 [![Actions Status](https://github.com/alexandreLamarre/pathlib/workflows/docs/badge.svg)](https://github.com/alexandreLamarre/pathlib/actions)
+[![codecov](https://codecov.io/gh/alexandreLamarre/pathlib/branch/main/graph/badge.svg?token=IUDESEEESZ)](https://codecov.io/gh/alexandreLamarre/pathlib)
 
 Rust implementation of the classic python object oriented filesystem library.
 
