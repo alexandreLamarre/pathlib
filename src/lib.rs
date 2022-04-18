@@ -1,3 +1,4 @@
+#![allow(dead_code)] // FIXME: remove when development is done
 use std::ops;
 
 /// Drive exists but is not accessible
@@ -19,6 +20,53 @@ fn _is_wildcard_pattern(pattern: &str) -> bool {
     pattern.contains('*') || pattern.contains('?') || pattern.contains('[')
 }
 
+/// Pure path for handling abstractions in filesystem paths
+/// an object oriented way.
+pub trait PurePath {
+    // === Conversion ===
+    fn new(path: &str) -> Self;
+    fn to_str(&self) -> &str;
+    fn bytes(&self) -> Vec<u8>;
+
+    // === Getters ===
+    fn parts(&self) -> Vec<&str>;
+    fn drive(&self) -> Option<&str>;
+    fn root(&self) -> Option<&str>;
+    fn anchor(&self) -> Option<&str>;
+    fn parents(&self) -> Vec<&str>;
+    fn parent(&self) -> Option<&str>;
+    fn name(&self) -> Option<&str>;
+    fn suffix(&self) -> Option<&str>;
+    fn suffixes(&self) -> Vec<&str>;
+    fn stem(&self) -> Option<&str>;
+    // fn as_posix_path(&self) -> &std::path::Path; FIXME: implement later
+    fn as_uri(&self) -> &str;
+
+    // === Path properties ===
+    fn is_absolute(&self) -> bool;
+    fn is_relative_to(&self, other: &Self) -> bool;
+    fn is_reserved(&self) -> bool;
+
+    // === Path transformations ===
+    fn join_path(&self, other: &Self) -> Self;
+    fn match_expr(&self, pattern: &str) -> bool;
+    fn relative_to(&self, other: &Self) -> Self;
+    fn with_name(&self, name: &str) -> Self;
+    fn with_stem(&self, stem: &str) -> Self;
+    fn with_suffix(&self, suffix: &str) -> Self;
+}
+
+/// Object oriented implementation of a filesystem paths
+pub trait SystemPath {
+    fn new(path: &str) -> Self;
+    fn is_dir(&self) -> bool;
+    fn is_file(&self) -> bool;
+    fn is_symlink(&self) -> bool;
+    fn is_executable(&self) -> bool;
+    fn is_readable(&self) -> bool;
+    fn is_writable(&self) -> bool;
+}
+
 /// Path implementation enum for the `Path` type.
 ///
 /// Used to wrap the system specific implementation of the user exposed `Path` struct.
@@ -28,27 +76,8 @@ enum PathImplementation {
     Pure(MockPath),
 }
 
-/// Pure path for handling IO operations in
-/// an object oriented way.
-pub trait PurePath {
-    fn new(path: &str) -> Self;
-    fn to_str(&self) -> &str;
-    fn is_dir(&self) -> bool;
-    fn is_file(&self) -> bool;
-    fn is_symlink(&self) -> bool;
-    fn is_executable(&self) -> bool;
-    fn is_readable(&self) -> bool;
-    fn is_writable(&self) -> bool;
-    fn bytes(&self) -> Vec<u8>;
-    // fn glob(&self, pattern: &str) -> std::slice::Iter<'_, Self>
-    // where
-    //     Self: std::marker::Sized;
-    // fn iterdir(&self) -> std::slice::Iter<'_, Self>
-    // where
-    //     Self: std::marker::Sized;
-}
-
 /// Mock filesystem path for testing Path trait
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct MockPath {
     path: String,
     // parts: Vec<String>,
@@ -72,25 +101,6 @@ impl PurePath for MockPath {
 
     fn to_str(&self) -> &str {
         self.path.as_str()
-    }
-
-    fn is_dir(&self) -> bool {
-        true
-    }
-    fn is_file(&self) -> bool {
-        true
-    }
-    fn is_symlink(&self) -> bool {
-        true
-    }
-    fn is_executable(&self) -> bool {
-        true
-    }
-    fn is_readable(&self) -> bool {
-        true
-    }
-    fn is_writable(&self) -> bool {
-        true
     }
     fn bytes(&self) -> Vec<u8> {
         self.path.as_bytes().to_vec()
@@ -161,6 +171,11 @@ pub struct PureWindowsPath {
 }
 
 /// Object oriented filesystems for Rust.
+///
+/// Should be used as the default object for handling filesystem paths.
+/// If explicit control is desired, use `WindowsPath` or `PosixPath` instead.
+///
+/// For convenience, a `MockPath` is also provided for testing purposes - it doesn't interact with the system's filesystem.
 pub struct Path {
     path: PathImplementation,
 }
