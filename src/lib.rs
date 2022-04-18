@@ -221,31 +221,31 @@ impl<'a> ToString for MockPath<'a> {
 }
 
 /// Implement '/' operator for Path abstractions between paths
-impl<'a> ops::Div<MockPath<'a>> for MockPath<'a> {
-    type Output = MockPath<'a>;
-    fn div(self, rhs: MockPath) -> MockPath<'a> {
-        let tmp: &'a str = format!("{}/{}", self.path, rhs.path).as_str();
-        MockPath::new(tmp.clone())
-    }
-}
+// impl<'a> ops::Div<MockPath<'_>> for MockPath<'a> {
+//     type Output = MockPath<'a>;
+//     fn div(self, rhs: MockPath) -> MockPath<'a> {
+//         let tmp: &'a str = format!("{}/{}", self.path, rhs.path).as_str();
+//         MockPath::new(tmp.clone())
+//     }
+// }
 
-/// Implement '/' for path abstractions between paths and string slices
-impl<'a> ops::Div<&str> for MockPath<'a> {
-    type Output = MockPath<'a>;
-    fn div(self, rhs: &str) -> MockPath<'a> {
-        let tmp: &'a str = format!("{}/{}", self.path, rhs).as_str();
-        MockPath::new(tmp.clone())
-    }
-}
+// /// Implement '/' for path abstractions between paths and string slices
+// impl<'a> ops::Div<&str> for MockPath<'a> {
+//     type Output = MockPath<'a>;
+//     fn div(self, rhs: &str) -> MockPath<'a> {
+//         let tmp: &'a str = format!("{}/{}", self.path, rhs).as_str();
+//         MockPath::new(tmp.clone())
+//     }
+// }
 
-/// Implement '/' for path abstractions between paths and strings
-impl<'a> ops::Div<String> for MockPath<'a> {
-    type Output = MockPath<'a>;
-    fn div(self, rhs: String) -> MockPath<'a> {
-        let tmp: &'a str = format!("{}/{}", self.path, rhs).as_str();
-        MockPath::new(tmp.clone())
-    }
-}
+// /// Implement '/' for path abstractions between paths and strings
+// impl<'a> ops::Div<String> for MockPath<'a> {
+//     type Output = MockPath<'a>;
+//     fn div(self, rhs: String) -> MockPath<'a> {
+//         let tmp: &'a str = format!("{}/{}", self.path, rhs).as_str();
+//         MockPath::new(tmp.clone())
+//     }
+// }
 
 /// Pure path implementation for non-windows systems.
 ///
@@ -317,14 +317,14 @@ mod tests {
         path_name : ("dirname/filename", "dirname/filename"),
     }
 
-    #[test]
-    fn mock_path_concat() {
-        let path = MockPath::new("dirname/subdir");
-        let concat = path / MockPath::new("filename.extension");
-        assert_eq!(concat.to_str(), "dirname/subdir/filename.extension");
+    // #[test]
+    // fn mock_path_concat() {
+    //     let path = MockPath::new("dirname/subdir");
+    //     let concat = path / MockPath::new("filename.extension");
+    //     assert_eq!(concat.to_str(), "dirname/subdir/filename.extension");
 
-        let path2 = MockPath::new("dirname/subdir");
-        let concat2 = path2 / "filename.extension";
-        assert_eq!(concat2.to_str(), "dirname/subdir/filename.extension");
-    }
+    //     let path2 = MockPath::new("dirname/subdir");
+    //     let concat2 = path2 / "filename.extension";
+    //     assert_eq!(concat2.to_str(), "dirname/subdir/filename.extension");
+    // }
 }
